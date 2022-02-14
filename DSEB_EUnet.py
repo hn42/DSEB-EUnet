@@ -201,39 +201,7 @@ def DecoderTransposeX2Block_my3(filters, stage, use_batchnorm=False,input_tensor
             skip__)
         y = layers.multiply([my_repeat, skip])
         x = layers.Concatenate(axis=concat_axis, name=concat_name)([x, y])
-    elif  skip is not None and 'se' in type:
-        shape_skip = backend.int_shape(skip)
-        if '3x3' in type:
-            skip__ = layers.Conv2D(1, (3, 3), padding='same')(skip)
-        elif '5x5' in type:
-            skip__ = layers.Conv2D(1, (5, 5), padding='same')(skip)
-        elif '7x7' in type:
-            skip__ = layers.Conv2D(1, (7, 7), padding='same')(skip)
-        else:
-            skip__ = layers.Conv2D(1, (1, 1), padding='same')(skip)
-        # concat = layers.Concatenate(axis=concat_axis, name=concat_name)([x__, skip__])
-        skip__ = layers.Activation('sigmoid',name='sig_'+str(stage))(skip__)
-        my_repeat = layers.Lambda(lambda x, repnum: backend.repeat_elements(x, repnum, axis=3),
-                                  arguments={'repnum': shape_skip[3]})(
-            skip__)
-        y = layers.multiply([my_repeat, skip])
-        x = layers.Concatenate(axis=concat_axis, name=concat_name)([x, y])
-    elif skip is not None and 'wb' in type:
-        skip__ = None
-        shape_skip = backend.int_shape(skip)
-        skip_p1 = layers.Conv2D(1, (1, 1), padding='same')(skip)
-        skip_p2 = layers.Conv2D(shape_skip[-1], (1, 1), padding='same')(skip)
-        skip_p2 = layers.Conv2D(1, (3, 3), padding='same')(skip_p2)
-        skip_p3 = layers.Conv2D(shape_skip[-1], (1, 1), padding='same')(skip)
-        skip_p3 = layers.Conv2D(1, (5, 5), padding='same')(skip_p3)
-        skip__ = layers.add([skip_p1, skip_p2,skip_p3])
-        # concat = layers.Concatenate(axis=concat_axis, name=concat_name)([x__, skip__])
-        skip__ = layers.Activation('sigmoid',name='sig_'+str(stage))(skip__)
-        my_repeat = layers.Lambda(lambda x, repnum: backend.repeat_elements(x, repnum, axis=3),
-                                  arguments={'repnum': shape_skip[3]})(
-            skip__)
-        y = layers.multiply([my_repeat, skip])
-        x = layers.Concatenate(axis=concat_axis, name=concat_name)([x, y])
+    
 
     x = Conv3x3BnReLU(filters, use_batchnorm, name=conv_block_name)(x)
     return x
